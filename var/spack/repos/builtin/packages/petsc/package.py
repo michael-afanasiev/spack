@@ -336,7 +336,7 @@ class Petsc(Package, CudaPackage, ROCmPackage):
             compiler_opts = [
                 '--with-cc=%s' % self.spec['mpi'].mpicc,
                 '--with-cxx=%s' % self.spec['mpi'].mpicxx,
-                '--with-fc=%s' % self.spec['mpi'].mpifc,
+                '--with-fc=%s' % (self.spec['mpi'].mpifc if hasattr(self.spec['mpi'], 'mpifc') else '0')
             ]
             if self.spec.satisfies('%intel'):
                 # mpiifort needs some help to automatically link
