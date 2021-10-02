@@ -85,6 +85,9 @@ class Openssl(Package):   # Uses Fake Autotools, should subclass Package
             description=('Use certificates from the ca-certificates-mozilla '
                          'package, symlink system certificates, or none'))
     variant('docs', default=False, description='Install docs and manpages')
+    variant('shared', default=True, description='Build shared libraries')
+    variant('static', default=False, description='Build static libraries')
+    variant('deprecated', default=True, description='Build legacy.so')
 
     depends_on('zlib')
     depends_on('perl@5.14.0:', type=('build', 'test'))
@@ -117,7 +120,13 @@ class Openssl(Package):   # Uses Fake Autotools, should subclass Package
             # where it happens automatically?)
             env['KERNEL_BITS'] = '64'
 
-        options = ['zlib', 'shared']
+        options = ['zlib']
+        if spec.satisfies("+shared"):
+            options.append("shared")
+        if spec.satisfies("-shared"):
+            options.append("no-shared")
+        if spec.satisfies("-deprecated"):
+            options.append("no-deprecated")
         if spec.satisfies('@1.0'):
             options.append('no-krb5')
         # clang does not support the .arch directive in assembly files.
