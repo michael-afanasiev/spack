@@ -86,7 +86,6 @@ class Openssl(Package):   # Uses Fake Autotools, should subclass Package
                          'package, symlink system certificates, or none'))
     variant('docs', default=False, description='Install docs and manpages')
     variant('shared', default=True, description='Build shared libraries')
-    variant('static', default=False, description='Build static libraries')
     variant('deprecated', default=True, description='Build legacy.so')
 
     depends_on('zlib')
@@ -125,6 +124,8 @@ class Openssl(Package):   # Uses Fake Autotools, should subclass Package
             options.append("shared")
         if spec.satisfies("-shared"):
             options.append("no-shared")
+        if spec.satisfies("-pic"):
+            options.append("no-pic")
         if spec.satisfies("-deprecated"):
             options.append("no-deprecated")
         if spec.satisfies('@1.0'):
