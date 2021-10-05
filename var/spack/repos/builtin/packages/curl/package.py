@@ -77,7 +77,9 @@ class Curl(AutotoolsPackage):
     variant('gssapi',     default=False, description='enable Kerberos support')
     variant('librtmp',    default=False, description='enable Rtmp support')
     variant('ldap',       default=False, description='enable ldap support')
-    variant('libidn2',    default=False,  description='enable libidn2 support')
+    variant('libidn2',    default=False, description='enable libidn2 support')
+    variant('shared',     default=True,  description='build shared library')
+    variant('static',     default=False, description='build static library')
 
     conflicts('+libssh', when='@:7.57')
     # on OSX and --with-ssh the configure steps fails with
@@ -95,7 +97,8 @@ class Curl(AutotoolsPackage):
     depends_on('mbedtls@3:', when='@7.79: tls=mbedtls')
     depends_on('mbedtls@:2', when='@:7.78 tls=mbedtls')
     depends_on('nss', when='tls=nss')
-    depends_on('openssl', when='tls=openssl')
+    depends_on('openssl', when='tls=openssl +shared')
+    depends_on('openssl ~shared', when='tls=openssl ~shared')
     depends_on('libidn2', when='+libidn2')
     depends_on('zlib')
     depends_on('nghttp2', when='+nghttp2')
@@ -167,6 +170,12 @@ class Curl(AutotoolsPackage):
             args.append('--with-gssapi=' + spec['krb5'].prefix)
         else:
             args.append('--without-gssapi')
+
+        if spec.satisfies('~shared'):
+            args.append('--disable-shared')
+
+        if spec.satisfies('+static'):
+            args.append('--enable-static')
 
         args += self.with_or_without('tls')
         args += self.with_or_without('libidn2', 'prefix')
