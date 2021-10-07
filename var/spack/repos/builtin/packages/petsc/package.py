@@ -168,6 +168,7 @@ class Petsc(Package, CudaPackage, ROCmPackage):
             description='Activates support for hwloc')
     variant('kokkos', default=False,
             description='Activates support for kokkos and kokkos-kernels')
+    variant('fortran', default=True, description="Activates fortran support")
 
     # 3.8.0 has a build issue with MKL - so list this conflict explicitly
     conflicts('^intel-mkl', when='@3.8.0')
@@ -514,6 +515,9 @@ class Petsc(Package, CudaPackage, ROCmPackage):
             options.append('HIPPPFLAGS=%s' % hip_inc)
             options.append('with-hip-lib=%s -L%s -lamdhip64' %
                            (hip_lib, spec['hip'].prefix.lib))
+
+        if '~fortran' in spec:
+            options.append('--with-fc=0')
 
         if 'superlu-dist' in spec:
             if spec.satisfies('@3.10.3:3.15'):
