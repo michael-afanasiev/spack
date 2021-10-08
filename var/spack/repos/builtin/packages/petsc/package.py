@@ -169,6 +169,8 @@ class Petsc(Package, CudaPackage, ROCmPackage):
     variant('kokkos', default=False,
             description='Activates support for kokkos and kokkos-kernels')
     variant('fortran', default=True, description="Activates fortran support")
+    variant('f2c-blas-lapack', default=False, 
+            description="Let PETSc download and install f2c-blas-lapack")
 
     # 3.8.0 has a build issue with MKL - so list this conflict explicitly
     conflicts('^intel-mkl', when='@3.8.0')
@@ -215,8 +217,8 @@ class Petsc(Package, CudaPackage, ROCmPackage):
 
     # PETSc, hypre, superlu_dist when built with int64 use 32 bit integers
     # with BLAS/LAPACK
-    depends_on('blas')
-    depends_on('lapack')
+    depends_on('blas', when='~f2c-blas-lapack')
+    depends_on('lapack', when='~f2c-blas-lapack')
     depends_on('mpi', when='+mpi')
     depends_on('cuda', when='+cuda')
     depends_on('hip', when='+rocm')
@@ -244,7 +246,7 @@ class Petsc(Package, CudaPackage, ROCmPackage):
 
     # PTScotch: Currently disable Parmetis wrapper, this means
     # nested disection won't be available thought PTScotch
-    depends_on('scotch+esmumps~metis+mpi', when='+ptscotch')
+    depends_on('scotch+esmumps+metis+mpi', when='+ptscotch')
     depends_on('scotch+int64', when='+ptscotch+int64')
 
     depends_on('hdf5@:1.10+mpi', when='@:3.12+hdf5+mpi')
@@ -383,10 +385,13 @@ class Petsc(Package, CudaPackage, ROCmPackage):
 
         # Make sure we use exactly the same Blas/Lapack libraries
         # across the DAG. To that end list them explicitly
-        lapack_blas = spec['lapack'].libs + spec['blas'].libs
-        options.extend([
-            '--with-blas-lapack-lib=%s' % lapack_blas.joined()
-        ])
+        if not spec.satisfies("+f2c-blas-lapack"):
+            lapack_blas = spec['lapack'].libs + spec['blas'].libs
+            options.extend([
+                '--with-blas-lapack-lib=%s' % lapack_blas.joined()
+            ])
+        else:
+            options.extend(['--download-f2cblaslapack'])
 
         if '+batch' in spec:
             options.append('--with-batch=1')
