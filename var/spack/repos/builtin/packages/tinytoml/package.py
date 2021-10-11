@@ -29,6 +29,7 @@ class Tinytoml(Package):
     homepage = "https://github.com/mayah/tinytoml"
     url      = "https://github.com/mayah/tinytoml/archive/refs/tags/v0.4.tar.gz"
 
+    version("master", git="https://github.com/michael-afanasiev/tinytoml", branch="master")
     version('0.4', sha256='bd5e330dcddceba26a2794f543071e0ef2a62ea52afb322d23674c36060e0afa')
 
     phases  = ["install"]
