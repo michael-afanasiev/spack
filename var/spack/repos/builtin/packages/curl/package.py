@@ -70,6 +70,7 @@ class Curl(AutotoolsPackage):
         # 'wolfssl',
     ]
 
+    variant('pic', default=False, description='Configure with pic')
     variant('tls', default=default_tls, description='TLS backend', values=values_tls, multi=True)
     variant('nghttp2',    default=False, description='build nghttp2 library (requires C++11)')
     variant('libssh2',    default=False, description='enable libssh2 support')
@@ -179,6 +180,9 @@ class Curl(AutotoolsPackage):
 
         if spec.satisfies('+static'):
             args.append('--enable-static')
+
+        if spec.satisfies('+pic'):
+            args.append('--with-pic')
 
         args += self.with_or_without('tls')
         args += self.with_or_without('libidn2', 'prefix')
